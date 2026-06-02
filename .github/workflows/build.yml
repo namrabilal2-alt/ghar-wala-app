@@ -1,4 +1,8 @@
-name: Build APK
+      - name: Permission
+        run: cd app-source/android && chmod +x gradlew
+
+      - name: Build APK
+        run: cd app-source/android && ./gradlew assembleRelease
 on:
   workflow_dispatch:
 jobs:
