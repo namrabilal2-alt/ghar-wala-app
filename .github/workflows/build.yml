@@ -1,31 +1,40 @@
-      - name: Permission
-        run: cd app-source/android && chmod +x gradlew
+name: Build APK
 
-      - name: Build APK
-        run: cd app-source/android && ./gradlew assembleRelease
 on:
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
-      - name: Unzip project
-        run: unzip ghar-wala-app.zip -d app-source
-      - name: Setup Node
+          distribution: 'temurin'
+      
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - name: Install deps
-        run: cd app-source && npm install
-      - name: Build APK
-        run: cd app-source/android && ./gradlew assembleRelease
-      - name: Upload APK
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+      
+      - name: Build Release APK
+        run: cd android && ./gradlew assembleRelease --no-daemon
+      
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ghar-wala-apk
-          path: app-source/android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 7
